@@ -1,0 +1,3 @@
+[submodule "Depends/choc"]
+	path = Depends/choc
+	url = https://github.com/Tracktion/choc
