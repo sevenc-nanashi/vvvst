@@ -14,7 +14,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-// .getFloat64()‚ÍInt64‚Ì‚ÉƒGƒ‰[‚ğ•Ô‚·‚Ì‚ÅA—Ç‚¢Š´‚¶‚É•ªŠò‚·‚é
+// .getFloat64()ã¯Int64ã®æ™‚ã«ã‚¨ãƒ©ãƒ¼ã‚’è¿”ã™ã®ã§ã€è‰¯ã„æ„Ÿã˜ã«åˆ†å²ã™ã‚‹
 double toFloat64(const choc::value::ValueView& value) {
 	if (value.isInt64()) {
 		return static_cast<double>(value.getInt64());
@@ -51,25 +51,26 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 #ifdef JUCE_DEBUG
 	options.enableDebugMode = true;
 #else
+ // ã“ã“ã‚‰è¾ºã¯ã¾ã å…ƒã‚³ãƒ¼ãƒ‰ã‚’ã‚³ãƒ”ãƒšã—ãŸã ã‘ã€å‹•ãã‹ã©ã†ã‹ã¯ä¸æ˜
 	options.enableDebugMode = false;
 
 
-	// ƒ‹[ƒgƒpƒXi"/"j‚Æ‚µ‚Ä—p‚¢‚éƒtƒ@ƒCƒ‹ƒpƒX‚ğİ’è‚·‚éB‚±‚±‚Å‚ÍAƒvƒƒOƒ‰ƒ€Eƒvƒ‰ƒOƒCƒ“‚ÌƒoƒCƒiƒŠ–{‘Ì‚ÌƒpƒX‚Æ“¯ˆêƒfƒBƒŒƒNƒgƒŠ‚É‚ ‚éi"WebView"jƒtƒHƒ‹ƒ_‚ğƒ‹[ƒgƒpƒXi"/"j‚É‚·‚é
+	// ãƒ«ãƒ¼ãƒˆãƒ‘ã‚¹ï¼ˆ"/"ï¼‰ã¨ã—ã¦ç”¨ã„ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‚’è¨­å®šã™ã‚‹ã€‚ã“ã“ã§ã¯ã€ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ»ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®ãƒã‚¤ãƒŠãƒªæœ¬ä½“ã®ãƒ‘ã‚¹ã¨åŒä¸€ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã«ã‚ã‚‹ï¼ˆ"WebView"ï¼‰ãƒ•ã‚©ãƒ«ãƒ€ã‚’ãƒ«ãƒ¼ãƒˆãƒ‘ã‚¹ï¼ˆ"/"ï¼‰ã«ã™ã‚‹
 	auto asset_directory = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile).getSiblingFile("WebView");
 
-	// WebView‚ÌÀsƒIƒvƒVƒ‡ƒ“‚Ì‚P‚Â‚Æ‚µ‚ÄAWebView‘¤‚Ì`fetch`—v‹‚É‘Î‰‚·‚éƒR[ƒ‹ƒoƒbƒNŠÖ”‚ğÀ‘•‚·‚é
+	// WebViewã®å®Ÿè¡Œæ™‚ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã®ï¼‘ã¤ã¨ã—ã¦ã€WebViewå´ã®`fetch`è¦æ±‚ã«å¯¾å¿œã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã‚’å®Ÿè£…ã™ã‚‹
 	options.fetchResource = [this, assetDirectory = asset_directory](const choc::ui::WebView::Options::Path& path)
 		-> std::optional<choc::ui::WebView::Options::Resource> {
-		// WebView‚©‚çƒ‹[ƒgƒpƒXi"/"j‚ÌƒŠƒNƒGƒXƒg‚ğó‚¯‚½ê‡A"/index.html"‚ğWebView‚É’ñ‹Ÿ‚·‚é
+		// WebViewã‹ã‚‰ãƒ«ãƒ¼ãƒˆãƒ‘ã‚¹ï¼ˆ"/"ï¼‰ã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’å—ã‘ãŸå ´åˆã€"/index.html"ã‚’WebViewã«æä¾›ã™ã‚‹
 		auto relative_path = "." + (path == "/" ? "/index.html" : path);
 		auto file_to_read = assetDirectory.getChildFile(relative_path);
 
-		// WebView‚É’ñ‹Ÿ‚·‚éƒŠƒ\[ƒX‚ÍƒoƒCƒiƒŠƒf[ƒ^‚Æ‚µ‚Ä“Ç‚İ‚Ş
+		// WebViewã«æä¾›ã™ã‚‹ãƒªã‚½ãƒ¼ã‚¹ã¯ãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿ã¨ã—ã¦èª­ã¿è¾¼ã‚€
 		juce::MemoryBlock memory_block;
 		if (!file_to_read.existsAsFile() || !file_to_read.loadFileAsData(memory_block))
 			return {};
 
-		// WebView‚ÉWebƒŠƒ\[ƒX(ƒoƒCƒiƒŠƒf[ƒ^+MIMEƒ^ƒCƒv)‚ğ•Ô‚·
+		// WebViewã«Webãƒªã‚½ãƒ¼ã‚¹(ãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿+MIMEã‚¿ã‚¤ãƒ—)ã‚’è¿”ã™
 		return choc::ui::WebView::Options::Resource{
 			std::vector<uint8_t>(memory_block.begin(), memory_block.end()),
 			getMimeType(file_to_read.getFileExtension().toStdString())
@@ -77,7 +78,7 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 		};
 #endif
 
-	// CHOC‚ÌAPI‚©‚çWebViewƒIƒuƒWƒFƒNƒg‚ğ¶¬‚·‚é.ˆø”‚É‚ÍÀsƒIƒvƒVƒ‡ƒ“‚ğ“n‚·
+	// CHOCã®APIã‹ã‚‰WebViewã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆã™ã‚‹.å¼•æ•°ã«ã¯å®Ÿè¡Œæ™‚ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’æ¸¡ã™
 	chocWebView = std::make_unique<choc::ui::WebView>(options);
 #if JUCE_WINDOWS
 	juceView = std::make_unique<juce::HWNDComponent>();
@@ -190,7 +191,7 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 	// Make sure that before the constructor has finished, you've set the
 	// editor's size to whatever you need it to be.
 	setResizable(true, true);
-	setSize(800, 600);
+	setSize(960, 640);
 }
 
 VVVSTAudioProcessorEditor::~VVVSTAudioProcessorEditor()
@@ -209,7 +210,7 @@ void VVVSTAudioProcessorEditor::resized()
 {
 	auto rect_ui = getLocalBounds();
 
-	// WebView‚Ì”z’uiÀ•W‚ÆƒTƒCƒY‚Ì“K—pj‚ğÀs‚·‚éB
+	// WebViewã®é…ç½®ï¼ˆåº§æ¨™ã¨ã‚µã‚¤ã‚ºã®é©ç”¨ï¼‰ã‚’å®Ÿè¡Œã™ã‚‹ã€‚
 	juceView->setBounds(getLocalBounds());
 	// This is generally where you'll want to lay out the positions of any
 	// subcomponents in your editor..
