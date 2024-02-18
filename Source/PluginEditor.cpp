@@ -113,7 +113,7 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 #ifdef JUCE_WINDOWS
 			auto appData = std::getenv("APPDATA");
 			auto path = std::string(appData) + "\\voicevox\\config.json";
-#elif	JUCE_MAC
+#elif JUCE_MAC
 			// Macの場合は$HOMEディレクトリのLibrary/Application Support/voicevox/config.jsonを読み込む			
 			auto home = std::getenv("HOME");
 			auto path = std::string(home) + "/Library/Application Support/voicevox/config.json";
