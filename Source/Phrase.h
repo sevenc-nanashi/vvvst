@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "choc/audio/choc_AudioFileFormat_WAV.h"
+#include <choc/audio/choc_AudioFileFormat_WAV.h>
 
 class Phrase {
 public:
