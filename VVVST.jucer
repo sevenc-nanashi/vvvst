@@ -33,7 +33,7 @@
   </MODULES>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
   <EXPORTFORMATS>
-    <VS2022 targetFolder="Builds/VisualStudio2022">
+    <VS2022 targetFolder="Builds/VisualStudio2022" extraCompilerFlags="/utf-8">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="VVVST" headerPath="..\..\Depends"
                        characterSet="Unicode"/>

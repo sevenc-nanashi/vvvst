@@ -14,8 +14,9 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-// .getFloat64()はInt64の時にエラーを返すので、良い感じに分岐する
-double toFloat64(const choc::value::ValueView& value) {
+// ValueView.getFloat64()はInt64でエラーが起きるので、それを回避するための関数
+double toFloat64(const choc::value::ValueView& value)
+{
 	if (value.isInt64()) {
 		return static_cast<double>(value.getInt64());
 	}
@@ -51,7 +52,7 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 #ifdef JUCE_DEBUG
 	options.enableDebugMode = true;
 #else
- // ここら辺はまだ元コードをコピペしただけ、動くかどうかは不明
+	// ここら辺はまだ元コードをコピペしただけ、動くかどうかは不明
 	options.enableDebugMode = false;
 
 
@@ -80,6 +81,11 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 
 	// CHOCのAPIからWebViewオブジェクトを生成する.引数には実行時オプションを渡す
 	chocWebView = std::make_unique<choc::ui::WebView>(options);
+	if (chocWebView == nullptr)
+	{
+		juce::Logger::writeToLog("Failed to create WebView");
+		return;
+	}
 #if JUCE_WINDOWS
 	juceView = std::make_unique<juce::HWNDComponent>();
 	juceView->setHWND(chocWebView->getViewHandle());
@@ -90,19 +96,19 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 	juceView = std::make_unique<juce::XEmbedComponent>(chocWebView->getViewHandle());
 #endif
 
-	chocWebView->bind("vstGetMemory",
+	chocWebView->bind("vstGetProject",
 		[safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args)
 		-> choc::value::Value {
-			std::string& memory = safe_this->audioProcessor.memory;
+			std::string& project = safe_this->audioProcessor.getProject();
 
-			return choc::value::createString(memory);
+			return choc::value::createString(project);
 		});
 
-	chocWebView->bind("vstSetMemory",
+	chocWebView->bind("vstSetProject",
 		[safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args)
 		-> choc::value::Value {
-			const auto memory = args[0].getString();
-			safe_this->audioProcessor.memory = memory;
+			const auto project = args[0].getString();
+			safe_this->audioProcessor.setProject(std::string(project));
 
 			return choc::value::Value(0);
 		});
@@ -111,6 +117,7 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 		[safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args)
 		-> choc::value::Value {
 #ifdef JUCE_WINDOWS
+			// Windowsの場合は%APPDATA%/voicevox/config.jsonを読み込む
 			auto appData = std::getenv("APPDATA");
 			auto path = std::string(appData) + "\\voicevox\\config.json";
 #elif JUCE_MAC

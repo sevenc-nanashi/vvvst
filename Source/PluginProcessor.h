@@ -58,13 +58,15 @@ public:
 	void setStateInformation(const void* data, int sizeInBytes) override;
 
 	//==============================================================================
-	std::string memory;
+	void setProject(std::string projectJson);
+	std::string getProject();
 	std::unordered_map<std::string, Phrase> phrases;
 
 	double sampleRate;
 	void setIsPlaying(bool isPlaying);
 
 private:
+	juce::ValueTree memory;
 	std::atomic<bool> lastIsPlaying;
 	std::atomic<bool> willSetIsPlaying;
 	std::atomic<bool> willSetIsPlayingValue;

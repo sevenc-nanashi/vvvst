@@ -15,7 +15,7 @@ VVVSTAudioProcessor::VVVSTAudioProcessor()
 		.withOutput("Output", juce::AudioChannelSet::stereo(), true)
 	)
 {
-	memory = "";
+	memory = juce::ValueTree("VVVST");
 }
 
 VVVSTAudioProcessor::~VVVSTAudioProcessor()
@@ -237,16 +237,28 @@ void VVVSTAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 	// You should use this method to store your parameters in the memory block.
 	// You could do that either as raw data, or use the XML or ValueTree classes
 	// as intermediaries to make it easy to save and load complex data.
-	destData.ensureSize(memory.size());
-	std::copy(memory.begin(), memory.end(), destData.begin());
+
+	std::unique_ptr<juce::XmlElement> xml(memory.createXml());
+	if (xml.get() != nullptr) {
+		copyXmlToBinary(*xml, destData);
+	}
 }
 
 void VVVSTAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
-	// You should use this method to restore your parameters from this memory block,
-	// whose contents will have been created by the getStateInformation() call.
-	std::vector<char> buffer = std::vector<char>((char*)data, (char*)data + sizeInBytes);
-	memory = std::string(buffer.begin(), buffer.end());
+	std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+
+	if (xmlState.get() != nullptr)
+		if (xmlState->hasTagName("project"))
+			memory = juce::ValueTree::fromXml(*xmlState);
+}
+
+std::string VVVSTAudioProcessor::getProject() {
+	return memory.getProperty("project").toString().toStdString();
+}
+
+void VVVSTAudioProcessor::setProject(std::string project) {
+	memory.setProperty("project", juce::var(project), nullptr);
 }
 
 //==============================================================================
