@@ -2,6 +2,8 @@
 
 エディタ側：https://github.com/sevenc-nanashi/voicevox/tree/add/vst
 
+`VVVST_example.jucer`を`VVVST.jucer`にして色々いじってください。
+
 ## ライセンス表記
 ```md
 # COx2/audio-plugin-web-ui
