@@ -6,6 +6,9 @@
               pluginCharacteristicsValue="pluginIsSynth" pluginVST3Category="Instrument,Synth"
               projectLineFeed="&#10;">
   <MAINGROUP id="Fcizwl" name="VVVST">
+    <GROUP id="{90464494-4A02-B60D-45DA-302523BC65AD}" name="Resources">
+      <FILE id="umPGuv" name="voicevox.zip" compile="0" resource="1" file="../vvvst-editor/dist_vst/voicevox.zip"/>
+    </GROUP>
     <GROUP id="{4BCACCFB-D5E5-30B8-914C-CCB5C755D47D}" name="Source">
       <FILE id="fhXVMF" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

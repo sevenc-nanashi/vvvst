@@ -361,3 +361,5 @@ MigrationBackup/
 Builds
 JuceLibraryCode
 VVVST.jucer
+Resources/*
+!Resources/.gitkeep

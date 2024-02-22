@@ -10,7 +10,9 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <vector>
 #include <choc/gui/choc_WebView.h>
+#include <BinaryData.h>
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
@@ -46,7 +48,14 @@ std::string getMimeType(std::string const& ext)
 
 //==============================================================================
 VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
-	: AudioProcessorEditor(&p), audioProcessor(p)
+	: AudioProcessorEditor(&p)
+	, audioProcessor(p)
+#ifndef JUCE_DEBUG
+	, stream(BinaryData::voicevox_zip,
+		BinaryData::voicevox_zipSize,
+		false)
+	, zipFile(stream)
+#endif
 {
 	choc::ui::WebView::Options options;
 #ifdef JUCE_DEBUG
@@ -55,27 +64,32 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 	// ここら辺はまだ元コードをコピペしただけ、動くかどうかは不明
 	options.enableDebugMode = false;
 
-
-	// ルートパス（"/"）として用いるファイルパスを設定する。ここでは、プログラム・プラグインのバイナリ本体のパスと同一ディレクトリにある（"WebView"）フォルダをルートパス（"/"）にする
-	auto asset_directory = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile).getSiblingFile("WebView");
-
 	// WebViewの実行時オプションの１つとして、WebView側の`fetch`要求に対応するコールバック関数を実装する
-	options.fetchResource = [this, assetDirectory = asset_directory](const choc::ui::WebView::Options::Path& path)
+	options.fetchResource = [this](const choc::ui::WebView::Options::Path& path)
 		-> std::optional<choc::ui::WebView::Options::Resource> {
-		// WebViewからルートパス（"/"）のリクエストを受けた場合、"/index.html"をWebViewに提供する
-		auto relative_path = "." + (path == "/" ? "/index.html" : path);
-		auto file_to_read = assetDirectory.getChildFile(relative_path);
+		std::string filePath = (path == "/" ? "index.html" : path.substr(1));
+		auto extension = filePath.substr(filePath.find_last_of('.'));
 
-		// WebViewに提供するリソースはバイナリデータとして読み込む
-		juce::MemoryBlock memory_block;
-		if (!file_to_read.existsAsFile() || !file_to_read.loadFileAsData(memory_block))
-			return {};
+		auto entry = this->zipFile.getEntry(filePath);
+		if (!entry)
+		{
+			return std::nullopt;
+		}
 
-		// WebViewにWebリソース(バイナリデータ+MIMEタイプ)を返す
+		auto fileData = this->zipFile.createStreamForEntry(*entry);
+		if (!fileData)
+		{
+			return std::nullopt;
+		}
+
+		juce::MemoryBlock block;
+		fileData->readIntoMemoryBlock(block);
+
 		return choc::ui::WebView::Options::Resource{
-			std::vector<uint8_t>(memory_block.begin(), memory_block.end()),
-			getMimeType(file_to_read.getFileExtension().toStdString())
+			std::vector<uint8_t>(block.begin(), block.end()),
+			getMimeType(extension)
 		};
+
 		};
 #endif
 

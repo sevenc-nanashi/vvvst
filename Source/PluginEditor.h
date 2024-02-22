@@ -31,6 +31,12 @@ private:
 	// This reference is provided as a quick way for your editor to
 	// access the processor object that created it.
 	VVVSTAudioProcessor& audioProcessor;
+
+#ifndef JUCE_DEBUG
+	juce::MemoryInputStream stream;
+	juce::ZipFile zipFile;
+#endif
+
 	std::unique_ptr<choc::ui::WebView> chocWebView;
 #if JUCE_WINDOWS
 	std::unique_ptr<juce::HWNDComponent> juceView;
