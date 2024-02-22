@@ -146,7 +146,7 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 			std::string str;
 
 			if (ifs.fail()) {
-				std::cerr << "Failed to open file." << std::endl;
+				DBG("Failed to open file");
 				return choc::value::Value(-1);
 			}
 			while (getline(ifs, str)) {

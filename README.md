@@ -2,7 +2,11 @@
 
 エディタ側：https://github.com/sevenc-nanashi/voicevox/tree/add/vst
 
-`VVVST_example.jucer`を`VVVST.jucer`にして色々いじってください。
+## 開発
+
+- エディタをクローンして`npm run vst:serve`するとVST用のエディタが立ち上がります
+- `VVVST_example.jucer`を`VVVST.jucer`にして色々いじってください
+- Releaseビルドするときはエディタを`npm run vst:build`すると生成される`voicevox.zip`をResources内に入れてください
 
 ## ライセンス表記
 ```md
