@@ -4,3 +4,4 @@
 -IJuceLibraryCode
 -IDepends/JUCE/modules
 -DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
+-Wunused-variable

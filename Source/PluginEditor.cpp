@@ -198,11 +198,7 @@ VVVSTAudioProcessorEditor::~VVVSTAudioProcessorEditor() { this->audioProcessor.r
 
 void VVVSTAudioProcessorEditor::paint(juce::Graphics& g) {}
 
-void VVVSTAudioProcessorEditor::resized() {
-  auto rect_ui = getLocalBounds();
-
-  juceView->setBounds(getLocalBounds());
-}
+void VVVSTAudioProcessorEditor::resized() { juceView->setBounds(getLocalBounds()); }
 
 void VVVSTAudioProcessorEditor::actionListenerCallback(const juce::String& message) {
   chocWebView->evaluateJavascript("window.vstOnMessage(" + message.toStdString() + ")");

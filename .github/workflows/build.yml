@@ -1,0 +1,86 @@
+name: "Build"
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-editor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Voicevox
+        uses: actions/checkout@v4
+        with:
+          repository: "sevenc-nanashi/voicevox"
+          ref: "add/vst"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Build
+        run: |
+          npm install
+          npm run vst:build
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-editor
+          path: dist_vst/voicevox.zip
+  build-each:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            name: "windows"
+          - os: macos-latest
+            name: "macos"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout VVVST
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Download Editor
+        uses: actions/download-artifact@v4
+        with:
+          name: build-editor
+          path: Resources
+
+      - name: Build
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+
+          zip -r build-${{ matrix.name }}.zip build/Vvvst_artefacts/Release/VST3/VVVST.vst3
+
+      - name: Determine Information
+        id: determine-information
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            if (github.ref_name) {
+              core.setOutput('ref_name', github.ref_name);
+              core.setOutput('prerelease', github.ref_name.includes("-"));
+            } else {
+              core.setOutput('ref_name', "dev");
+              core.setOutput('prerelease', true);
+            }
+
+      - name: Upload
+        uses: softprops/action-gh-release@v1
+        with:
+          files: vvvst-${{ steps.determine-information.outputs.ref_name }}-${{ matrix.name }}.zip
+          release_name: ${{ steps.determine-information.outputs.ref_name }}
