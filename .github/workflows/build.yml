@@ -37,6 +37,7 @@ jobs:
           name: build-editor
           path: dist_vst/voicevox.zip
   build-each:
+    needs: build-editor
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
