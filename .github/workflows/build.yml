@@ -65,12 +65,6 @@ jobs:
         with:
           path: build
           key: cmake-${{ matrix.os }}-v1
-      - name: Build
-        run: |
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release
-
-          7z a -tzip vvvst-${{ matrix.name }}.zip build/Vvvst_artefacts/Release/VST3/VVVST.vst3
 
       - name: Determine Information
         id: determine-information
@@ -81,15 +75,23 @@ jobs:
             if (github.ref_name) {
               core.setOutput('ref_name', github.ref_name);
               core.setOutput('prerelease', github.ref_name.includes("-"));
+              core.setOutput('zip_name', `vvvst-${github.ref_name}-${matrix.name}.zip`);
             } else {
               core.setOutput('ref_name', "dev");
               core.setOutput('prerelease', true);
+              core.setOutput('zip_name', `vvvst-dev-${matrix.name}.zip`);
             }
+
+      - name: Build
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+
+          7z a -tzip ${{ steps.determine-information.outputs.zip_name }} build/Vvvst_artefacts/Release/VST3/VVVST.vst3
 
       - name: Upload
         uses: softprops/action-gh-release@v1
         with:
-          description: "SHA: ${{ github.sha }}"
-          files: vvvst-${{ steps.determine-information.outputs.ref_name }}-${{ matrix.name }}.zip
+          body: "SHA: ${{ github.sha }}"
+          files: ${{ steps.determine-information.outputs.zip_name }}
           tag_name: ${{ steps.determine-information.outputs.ref_name }}
-          release_name: ${{ steps.determine-information.outputs.ref_name }}
