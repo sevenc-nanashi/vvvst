@@ -60,12 +60,17 @@ jobs:
           name: build-editor
           path: Resources
 
+      - name: Cache CMake
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: cmake-${{ matrix.os }}-v1
       - name: Build
         run: |
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
-          zip -r build-${{ matrix.name }}.zip build/Vvvst_artefacts/Release/VST3/VVVST.vst3
+          7z a -tzip vvvst-${{ matrix.name }}.zip build/Vvvst_artefacts/Release/VST3/VVVST.vst3
 
       - name: Determine Information
         id: determine-information
