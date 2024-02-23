@@ -1,269 +1,150 @@
-/*
-  ==============================================================================
-
-	This file contains the basic framework code for a JUCE plugin processor.
-
-  ==============================================================================
-*/
-
 #include "PluginProcessor.h"
+
 #include "PluginEditor.h"
 
-//==============================================================================
 VVVSTAudioProcessor::VVVSTAudioProcessor()
-	: AudioProcessor(BusesProperties()
-		.withOutput("Output", juce::AudioChannelSet::stereo(), true)
-	)
-{
-	memory = juce::ValueTree("VVVST");
+    : AudioProcessor(BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true)) {
+  memory = juce::ValueTree("VVVST");
 }
 
-VVVSTAudioProcessor::~VVVSTAudioProcessor()
-{
-}
+VVVSTAudioProcessor::~VVVSTAudioProcessor() {}
 
-//==============================================================================
-const juce::String VVVSTAudioProcessor::getName() const
-{
-	return JucePlugin_Name;
-}
-
-bool VVVSTAudioProcessor::acceptsMidi() const
-{
-#if JucePlugin_WantsMidiInput
-	return true;
+const juce::String VVVSTAudioProcessor::getName() const {
+#ifdef JUCE_DEBUG
+  return "VVVST [Debug]";
 #else
-	return false;
+  return "VVVST";
 #endif
 }
 
-bool VVVSTAudioProcessor::producesMidi() const
-{
-#if JucePlugin_ProducesMidiOutput
-	return true;
-#else
-	return false;
-#endif
-}
+bool VVVSTAudioProcessor::acceptsMidi() const { return false; }
 
-bool VVVSTAudioProcessor::isMidiEffect() const
-{
-#if JucePlugin_IsMidiEffect
-	return true;
-#else
-	return false;
-#endif
-}
+bool VVVSTAudioProcessor::producesMidi() const { return false; }
 
-double VVVSTAudioProcessor::getTailLengthSeconds() const
-{
-	return 0.0;
-}
+bool VVVSTAudioProcessor::isMidiEffect() const { return false; }
 
-int VVVSTAudioProcessor::getNumPrograms()
-{
-	return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-	// so this should be at least 1, even if you're not really implementing programs.
-}
+double VVVSTAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 
-int VVVSTAudioProcessor::getCurrentProgram()
-{
-	return 0;
-}
+int VVVSTAudioProcessor::getNumPrograms() { return 1; }
 
-void VVVSTAudioProcessor::setCurrentProgram(int index)
-{
-}
+int VVVSTAudioProcessor::getCurrentProgram() { return 0; }
 
-const juce::String VVVSTAudioProcessor::getProgramName(int index)
-{
-	return {};
-}
+void VVVSTAudioProcessor::setCurrentProgram(int index) {}
 
-void VVVSTAudioProcessor::changeProgramName(int index, const juce::String& newName)
-{
-}
+const juce::String VVVSTAudioProcessor::getProgramName(int index) { return {}; }
 
-//==============================================================================
-void VVVSTAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
-{
-	this->sampleRate = sampleRate;
-	// Use this method as the place to do any pre-playback
-	// initialisation that you need..
-}
+void VVVSTAudioProcessor::changeProgramName(int index, const juce::String& newName) {}
 
-void VVVSTAudioProcessor::releaseResources()
-{
-	// When playback stops, you can use this as an opportunity to free up any
-	// spare memory, etc.
-}
+void VVVSTAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) { this->sampleRate = sampleRate; }
 
-#ifndef JucePlugin_PreferredChannelConfigurations
-bool VVVSTAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
-{
-#if JucePlugin_IsMidiEffect
-	juce::ignoreUnused(layouts);
-	return true;
-#else
-	// This is the place where you check if the layout is supported.
-	// In this template code we only support mono or stereo.
-	// Some plugin hosts, such as certain GarageBand versions, will only
-	// load plugins that support stereo bus layouts.
-	if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-		&& layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-		return false;
+void VVVSTAudioProcessor::releaseResources() {}
 
-	// This checks if the input layout matches the output layout
-#if ! JucePlugin_IsSynth
-	if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-		return false;
-#endif
+void VVVSTAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+  juce::ScopedNoDenormals noDenormals;
+  auto totalNumInputChannels = getTotalNumInputChannels();
+  auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-	return true;
-#endif
-}
-#endif
+  for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i) buffer.clear(i, 0, buffer.getNumSamples());
 
-void VVVSTAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
-{
-	juce::ScopedNoDenormals noDenormals;
-	auto totalNumInputChannels = getTotalNumInputChannels();
-	auto totalNumOutputChannels = getTotalNumOutputChannels();
+  auto* playHead = getPlayHead();
+  if (playHead == nullptr) {
+    return;
+  }
+  auto position = playHead->getPosition();
+  if (!position.hasValue()) {
+    return;
+  }
+  auto maybeCurrentTime = position->getTimeInSeconds();
+  if (maybeCurrentTime.hasValue()) {
+    double currentTime = *maybeCurrentTime;
+    if (lastTime != currentTime) {
+      juce::DynamicObject::Ptr json = new juce::DynamicObject();
+      json->setProperty("type", "update:time");
+      json->setProperty("time", currentTime);
+      this->sendActionMessage(juce::JSON::toString(json.get()));
 
+      lastTime = currentTime;
+    }
+    if (position->getIsPlaying()) {
+      std::optional<Phrase> maybeCurrentPhrase;
+      for (auto& [_, phrase] : phrases) {
+        if (phrase.startTime <= currentTime && phrase.endTime >= currentTime) {
+          if (maybeCurrentPhrase.has_value()) {
+            auto& currentPhrase = maybeCurrentPhrase.value();
+            auto& newPhrase = phrase;
+            if (newPhrase.startTime < currentPhrase.startTime) {
+              maybeCurrentPhrase = phrase;
+            }
+          } else {
+            maybeCurrentPhrase = phrase;
+          }
+        }
+      }
+      if (maybeCurrentPhrase.has_value()) {
+        auto& currentPhrase = maybeCurrentPhrase.value();
+        auto frameIndex = (int)((currentTime - currentPhrase.startTime) * sampleRate);
+        if (frameIndex > 0) {
+          if (frameIndex >= currentPhrase.data.frames.getSize().numFrames) {
+            frameIndex = currentPhrase.data.frames.getSize().numFrames - 1;
+          }
+          for (auto sampleIndex = 0; sampleIndex < buffer.getNumSamples(); ++sampleIndex) {
+            auto frame = currentPhrase.data.frames.getSample(0, frameIndex + sampleIndex);
+            for (auto i = 0; i < totalNumOutputChannels; ++i) buffer.getWritePointer(i)[sampleIndex] = frame;
+            if (frameIndex >= currentPhrase.data.frames.getSize().numFrames) {
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  if (willSetIsPlaying) {
+    position->setIsPlaying(willSetIsPlayingValue);
+    willSetIsPlaying = false;
+  } else {
+    auto isPlaying = position->getIsPlaying();
+    if (lastIsPlaying != isPlaying) {
+      juce::DynamicObject::Ptr json = new juce::DynamicObject();
+      json->setProperty("type", "update:isPlaying");
+      json->setProperty("isPlaying", isPlaying);
+      this->sendActionMessage(juce::JSON::toString(json.get()));
 
-
-	// In case we have more outputs than inputs, this code clears any output
-	// channels that didn't contain input data, (because these aren't
-	// guaranteed to be empty - they may contain garbage).
-	// This is here to avoid people getting screaming feedback
-	// when they first compile a plugin, but obviously you don't need to keep
-	// this code if your algorithm always overwrites all the output channels.
-	for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-		buffer.clear(i, 0, buffer.getNumSamples());
-
-	auto* playHead = getPlayHead();
-	if (playHead == nullptr) {
-		return;
-	}
-	auto position = playHead->getPosition();
-	if (!position.hasValue()) {
-		return;
-	}
-	auto maybeCurrentTime = position->getTimeInSeconds();
-	if (maybeCurrentTime.hasValue()) {
-		double currentTime = *maybeCurrentTime;
-		if (lastTime != currentTime) {
-			juce::DynamicObject::Ptr json = new juce::DynamicObject();
-			json->setProperty("type", "update:time");
-			json->setProperty("time", currentTime);
-			this->sendActionMessage(juce::JSON::toString(json.get()));
-
-			lastTime = currentTime;
-		}
-		if (position->getIsPlaying()) {
-			std::optional<Phrase> maybeCurrentPhrase;
-			for (auto& [_, phrase] : phrases) {
-				if (phrase.startTime <= currentTime && phrase.endTime >= currentTime) {
-					if (maybeCurrentPhrase.has_value()) {
-						auto& currentPhrase = maybeCurrentPhrase.value();
-						auto& newPhrase = phrase;
-						if (newPhrase.startTime < currentPhrase.startTime) {
-							maybeCurrentPhrase = phrase;
-						}
-					}
-					else {
-						maybeCurrentPhrase = phrase;
-					}
-				}
-			}
-			if (maybeCurrentPhrase.has_value()) {
-				auto& currentPhrase = maybeCurrentPhrase.value();
-				auto frameIndex = (int)((currentTime - currentPhrase.startTime) * sampleRate);
-				if (frameIndex > 0) {
-					if (frameIndex >= currentPhrase.data.frames.getSize().numFrames) {
-						frameIndex = currentPhrase.data.frames.getSize().numFrames - 1;
-					}
-					for (auto sampleIndex = 0; sampleIndex < buffer.getNumSamples(); ++sampleIndex) {
-						auto frame = currentPhrase.data.frames.getSample(0, frameIndex + sampleIndex);
-						for (auto i = 0; i < totalNumOutputChannels; ++i)
-							buffer.getWritePointer(i)[sampleIndex] = frame;
-						if (frameIndex >= currentPhrase.data.frames.getSize().numFrames) {
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	if (willSetIsPlaying) {
-		position->setIsPlaying(willSetIsPlayingValue);
-		willSetIsPlaying = false;
-		// lastIsPlaying = willSetIsPlayingValue.load();
-	}
-	else {
-		auto isPlaying = position->getIsPlaying();
-		if (lastIsPlaying != isPlaying) {
-			juce::DynamicObject::Ptr json = new juce::DynamicObject();
-			json->setProperty("type", "update:isPlaying");
-			json->setProperty("isPlaying", isPlaying);
-			this->sendActionMessage(juce::JSON::toString(json.get()));
-
-			lastIsPlaying = isPlaying;
-		}
-	}
+      lastIsPlaying = isPlaying;
+    }
+  }
 }
 
 void VVVSTAudioProcessor::setIsPlaying(bool isPlaying) {
-	willSetIsPlaying = true;
-	willSetIsPlayingValue = isPlaying;
+  willSetIsPlaying = true;
+  willSetIsPlayingValue = isPlaying;
 }
 
-//==============================================================================
-bool VVVSTAudioProcessor::hasEditor() const
-{
-	return true; // (change this to false if you choose to not supply an editor)
+bool VVVSTAudioProcessor::hasEditor() const { return true; }
+
+juce::AudioProcessorEditor* VVVSTAudioProcessor::createEditor() {
+  auto editor = new VVVSTAudioProcessorEditor(*this);
+  addActionListener(editor);
+  return editor;
 }
 
-juce::AudioProcessorEditor* VVVSTAudioProcessor::createEditor()
-{
-	auto editor = new VVVSTAudioProcessorEditor(*this);
-	addActionListener(editor);
-	return editor;
+void VVVSTAudioProcessor::getStateInformation(juce::MemoryBlock& destData) {
+  std::unique_ptr<juce::XmlElement> xml(memory.createXml());
+  if (xml.get() != nullptr) {
+    copyXmlToBinary(*xml, destData);
+  }
 }
 
-//==============================================================================
-void VVVSTAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
-{
-	// You should use this method to store your parameters in the memory block.
-	// You could do that either as raw data, or use the XML or ValueTree classes
-	// as intermediaries to make it easy to save and load complex data.
+void VVVSTAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
+  std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
-	std::unique_ptr<juce::XmlElement> xml(memory.createXml());
-	if (xml.get() != nullptr) {
-		copyXmlToBinary(*xml, destData);
-	}
+  if (xmlState.get() != nullptr)
+    if (xmlState->hasTagName("project")) memory = juce::ValueTree::fromXml(*xmlState);
 }
 
-void VVVSTAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
-{
-	std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
-
-	if (xmlState.get() != nullptr)
-		if (xmlState->hasTagName("project"))
-			memory = juce::ValueTree::fromXml(*xmlState);
-}
-
-std::string VVVSTAudioProcessor::getProject() {
-	return memory.getProperty("project").toString().toStdString();
-}
+std::string VVVSTAudioProcessor::getProject() { return memory.getProperty("project").toString().toStdString(); }
 
 void VVVSTAudioProcessor::setProject(std::string project) {
-	memory.setProperty("project", juce::var(project), nullptr);
+  memory.setProperty("project", juce::var(project), nullptr);
 }
 
-//==============================================================================
-// This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-	return new VVVSTAudioProcessor();
-}
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new VVVSTAudioProcessor(); }

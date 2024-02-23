@@ -1,0 +1,6 @@
+-xc++
+-std=c++17
+-IDepends
+-IJuceLibraryCode
+-IDepends/JUCE/modules
+-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
