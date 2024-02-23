@@ -89,6 +89,7 @@ jobs:
       - name: Upload
         uses: softprops/action-gh-release@v1
         with:
+          description: "SHA: ${{ github.sha }}"
           files: vvvst-${{ steps.determine-information.outputs.ref_name }}-${{ matrix.name }}.zip
           tag_name: ${{ steps.determine-information.outputs.ref_name }}
           release_name: ${{ steps.determine-information.outputs.ref_name }}
