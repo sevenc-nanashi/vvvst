@@ -7,17 +7,29 @@ add_subdirectory(Depends/JUCE)
 if(MSVC)
   add_compile_options(/utf-8)
 endif()
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(PRODUCT_NAME "VVVST")
+else()
+  set(PRODUCT_NAME "VVVST (Debug)")
+endif()
 
 juce_add_plugin(Vvvst
     IS_SYNTH TRUE
     FORMATS VST3
-    PRODUCT_NAME "VVVST")
+    COMPANY_NAME "Nanashi. <https://sevenc7c.com>"
+    COMPANY_WEBSITE "https://github.com/sevenc-nanashi/VVVST"
+    COMPANY_COPYRIGHT "(c) 2024 Nanashi."
+    #    COMPANY_NAME "Voicevox"
+    #    COMPANY_WEBSITE "https://voicevox.hiroshiba.jp/"
+    PRODUCT_NAME ${PRODUCT_NAME})
 
 file(GLOB_RECURSE SOURCES "Source/*.cpp" "Source/*.h")
+file(GLOB_RECURSE SOURCES_MIMETYPES "Depends/MimeTypes/*.cpp" "Depends/MimeTypes/*.h")
 juce_generate_juce_header(Vvvst)
 target_sources(Vvvst
     PRIVATE
-        ${SOURCES})
+        ${SOURCES}
+        ${SOURCES_MIMETYPES})
 
 target_include_directories(Vvvst
     PRIVATE

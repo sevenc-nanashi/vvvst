@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <choc/gui/choc_WebView.h>
+#include <MimeTypes/MimeTypes.h>
 #include <BinaryData.h>
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
@@ -25,25 +26,6 @@ double toFloat64(const choc::value::ValueView& value)
 	else {
 		return value.getFloat64();
 	}
-}
-
-std::string getMimeType(std::string const& ext)
-{
-	static std::unordered_map<std::string, std::string> mimeTypes{
-	  { ".html",   "text/html" },
-	  { ".js",     "application/javascript" },
-	  { ".css",    "text/css" },
-	  { ".json",   "application/json"},
-	  { ".svg",    "image/svg+xml"},
-	  { ".svgz",   "image/svg+xml"},
-	};
-
-	if (mimeTypes.count(ext) > 0)
-	{
-		return mimeTypes.at(ext);
-	}
-
-	return "application/octet-stream";
 }
 
 //==============================================================================
@@ -61,14 +43,12 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 #ifdef JUCE_DEBUG
 	options.enableDebugMode = true;
 #else
-	// ここら辺はまだ元コードをコピペしただけ、動くかどうかは不明
 	options.enableDebugMode = false;
 
 	// WebViewの実行時オプションの１つとして、WebView側の`fetch`要求に対応するコールバック関数を実装する
 	options.fetchResource = [this](const choc::ui::WebView::Options::Path& path)
 		-> std::optional<choc::ui::WebView::Options::Resource> {
 		std::string filePath = (path == "/" ? "index.html" : path.substr(1));
-		auto extension = filePath.substr(filePath.find_last_of('.'));
 
 		auto entry = this->zipFile.getEntry(filePath);
 		if (!entry)
@@ -85,9 +65,17 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
 		juce::MemoryBlock block;
 		fileData->readIntoMemoryBlock(block);
 
+    auto mimeType = MimeTypes::getType(filePath.c_str());
+    std::string mimeTypeStr;
+    if (mimeType == nullptr) {
+      mimeTypeStr = "application/octet-stream";
+    } else {
+      mimeTypeStr = mimeType;
+    }
+
 		return choc::ui::WebView::Options::Resource{
 			std::vector<uint8_t>(block.begin(), block.end()),
-			getMimeType(extension)
+      mimeTypeStr
 		};
 
 		};

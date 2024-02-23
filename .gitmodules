@@ -4,3 +4,6 @@
 [submodule "depends/JUCE"]
 	path = depends/JUCE
 	url = https://github.com/juce-framework/JUCE
+[submodule "depends/MimeTypes"]
+	path = depends/MimeTypes
+	url = https://github.com/lasselukkari/MimeTypes.git
