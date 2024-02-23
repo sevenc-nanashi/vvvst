@@ -75,11 +75,11 @@ jobs:
             if (github.ref_name) {
               core.setOutput('ref_name', github.ref_name);
               core.setOutput('prerelease', github.ref_name.includes("-"));
-              core.setOutput('zip_name', `vvvst-${github.ref_name}-${matrix.name}.zip`);
+              core.setOutput('zip_name', `vvvst-${github.ref_name}-${{ matrix.name }}.zip`);
             } else {
               core.setOutput('ref_name', "dev");
               core.setOutput('prerelease', true);
-              core.setOutput('zip_name', `vvvst-dev-${matrix.name}.zip`);
+              core.setOutput('zip_name', `vvvst-dev-${{ matrix.name }}.zip`);
             }
 
       - name: Build
