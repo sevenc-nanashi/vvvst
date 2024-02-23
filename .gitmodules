@@ -1,3 +1,6 @@
 [submodule "Depends/choc"]
 	path = Depends/choc
 	url = https://github.com/Tracktion/choc
+[submodule "depends/JUCE"]
+	path = depends/JUCE
+	url = https://github.com/juce-framework/JUCE
