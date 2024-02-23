@@ -1,9 +1,9 @@
 [submodule "Depends/choc"]
 	path = Depends/choc
 	url = https://github.com/Tracktion/choc
-[submodule "depends/JUCE"]
-	path = depends/JUCE
+[submodule "Depends/JUCE"]
+	path = Depends/JUCE
 	url = https://github.com/juce-framework/JUCE
-[submodule "depends/MimeTypes"]
-	path = depends/MimeTypes
+[submodule "Depends/MimeTypes"]
+	path = Depends/MimeTypes
 	url = https://github.com/lasselukkari/MimeTypes.git
