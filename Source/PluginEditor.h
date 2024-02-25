@@ -3,6 +3,7 @@
 
 #include <JuceHeader.h>
 #include <choc/gui/choc_WebView.h>
+#include <shared_mutex>
 #include <unordered_map>
 
 #include "PluginProcessor.h"

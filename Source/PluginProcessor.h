@@ -42,6 +42,8 @@ class VVVSTAudioProcessor : public juce::AudioProcessor, public juce::ActionBroa
   double sampleRate;
   void setIsPlaying(bool isPlaying);
 
+  juce::CriticalSection phrasesLock;
+
  private:
   juce::ValueTree memory;
   std::atomic<bool> lastIsPlaying;
