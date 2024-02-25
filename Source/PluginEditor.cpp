@@ -3,6 +3,7 @@
 #include <BinaryData.h>
 #include <MimeTypes/MimeTypes.h>
 #include <choc/gui/choc_WebView.h>
+#include <uuid_v4/uuid_v4.h>
 
 #include <cstdlib>
 #include <fstream>
@@ -34,6 +35,23 @@ std::string safeGetenv(const char* name) {
   free(value);
   return res;
 }
+
+#include <Windows.h>
+
+// UTF-8のvector<uint8_t>をstd::stringに変換する関数
+std::string utf8ToString(const std::vector<uint8_t>& utf8) {
+  int bufferSize = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(utf8.data()), utf8.size(), nullptr, 0);
+  std::vector<wchar_t> buffer(bufferSize);
+  MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(utf8.data()), utf8.size(), buffer.data(),
+                      buffer.size());
+  int size = WideCharToMultiByte(CP_ACP, 0, buffer.data(), buffer.size(), nullptr, 0, nullptr, nullptr);
+  std::vector<char> result(size);
+  WideCharToMultiByte(CP_ACP, 0, buffer.data(), buffer.size(), result.data(), result.size(), nullptr, nullptr);
+  return std::string(result.begin(), result.end());
+}
+#else
+// Windows以外では多分全部utf-8なのでそのままstd::stringに変換する
+std::string utf8ToString(const std::vector<uint8_t>& utf8) { return std::string(utf8.begin(), utf8.end()); }
 #endif
 
 //==============================================================================
@@ -148,6 +166,68 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
         safe_this->audioProcessor.phrases.clear();
 
         return choc::value::Value(0);
+      });
+  chocWebView->bind(
+      "vstGetPhrases",
+      [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
+        std::string res = "";
+        for (auto& [id, phrase] : safe_this->audioProcessor.phrases) {
+          choc::audio::WAVAudioFileFormat<false> wavFileFormat;
+          auto start = phrase.startTime;
+          auto end = phrase.endTime;
+          res += id + ":" + std::to_string(start) + ":" + std::to_string(end) + "\n";
+        }
+
+        return choc::value::createString(res);
+      });
+  chocWebView->bind(
+      "vstShowImportFileDialog",
+      [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
+        std::string title(args[0].getString());
+        std::string extension;
+        if (args[1].isArray()) {
+          for (const auto& ext : args[1]) {
+            extension += "*." + std::string(ext.getString()) + ";";
+          }
+          extension.pop_back();
+        } else {
+          extension = "*";
+        }
+        // juce::FileChooser chooser(title, juce::File(), extension);
+        auto chooser = std::make_unique<juce::FileChooser>(title, juce::File(), extension);
+        UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+        UUIDv4::UUID uuidObj = uuidGenerator.getUUID();
+        std::string uuid = uuidObj.str();
+        chooser->launchAsync(juce::FileBrowserComponent::openMode, [safe_this, uuid](const juce::FileChooser& chooser) {
+          auto result = chooser.getResult();
+          if (result == juce::File()) {
+            safe_this->chocWebView->evaluateJavascript("window.vstOnFileChosen('" + uuid + "', undefined)");
+          } else {
+            auto quotedString = choc::json::toString(choc::value::createString(result.getFullPathName().toStdString()));
+            safe_this->chocWebView->evaluateJavascript("window.vstOnFileChosen('" + uuid + "', " + quotedString + ")");
+          }
+          safe_this->fileChoosers.erase(uuid);
+        });
+        safe_this->fileChoosers.insert_or_assign(uuid, std::move(chooser));
+        return choc::value::createString(uuid);
+      });
+  chocWebView->bind(
+      "vstReadFile",
+      [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
+        std::string pathBase64(args[0].getString());
+        std::vector<uint8_t> pathBuffer;
+        choc::base64::decodeToContainer(pathBuffer, pathBase64);
+        std::string path = utf8ToString(pathBuffer);
+
+        std::ifstream ifs(path);
+
+        if (ifs.fail()) {
+          DBG("Failed to open file");
+          return choc::value::Value(-1);
+        }
+        std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+        std::string data = choc::base64::encodeToString(buffer);
+        return choc::value::createString(data);
       });
   chocWebView->bind(
       "vstUpdatePhrases",

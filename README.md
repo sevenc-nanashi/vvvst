@@ -5,8 +5,19 @@
 ## 開発
 
 - エディタをクローンして`npm run vst:serve`すると VST 用のエディタが立ち上がります
-- `cmake -S . -B build`でビルドディレクトリを作成して`cmake --build build`でビルドします
 - Release ビルドするときはエディタを`npm run vst:build`すると生成される`voicevox.zip`を Resources 内に入れてください
+
+## コマンド
+
+```bash
+# Debug
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --config Debug
+
+# Release
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
 
 ## ライセンス表記
 

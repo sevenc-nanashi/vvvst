@@ -3,10 +3,12 @@ cmake_minimum_required(VERSION 3.22)
 project(VVVST VERSION 0.0.1)
 
 add_subdirectory(Depends/JUCE)
+add_subdirectory(Depends/uuid_v4)
 
 if(MSVC)
   add_compile_options(/utf-8)
 endif()
+
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
   set(PRODUCT_NAME "VVVST")
   set(BUNDLE_ID "com.sevenc-nanashi.vvvst")

@@ -3,6 +3,7 @@
 
 #include <JuceHeader.h>
 #include <choc/gui/choc_WebView.h>
+#include <unordered_map>
 
 #include "PluginProcessor.h"
 
@@ -18,6 +19,7 @@ class VVVSTAudioProcessorEditor : public juce::AudioProcessorEditor, public juce
 
  private:
   VVVSTAudioProcessor& audioProcessor;
+  std::unordered_map<std::string, std::unique_ptr<juce::FileChooser>> fileChoosers;
 
 #ifndef JUCE_DEBUG
   juce::MemoryInputStream stream;

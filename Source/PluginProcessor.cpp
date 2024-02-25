@@ -11,7 +11,7 @@ VVVSTAudioProcessor::~VVVSTAudioProcessor() {}
 
 const juce::String VVVSTAudioProcessor::getName() const {
 #ifdef JUCE_DEBUG
-  return "VVVST [Debug]";
+  return "VVVST (Debug)";
 #else
   return "VVVST";
 #endif

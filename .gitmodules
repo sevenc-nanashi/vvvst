@@ -7,3 +7,6 @@
 [submodule "Depends/MimeTypes"]
 	path = Depends/MimeTypes
 	url = https://github.com/lasselukkari/MimeTypes.git
+[submodule "Depends/uuid_v4"]
+	path = Depends/uuid_v4
+	url = https://github.com/crashoz/uuid_v4.git
