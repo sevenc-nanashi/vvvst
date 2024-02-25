@@ -3,5 +3,7 @@
 -IDepends
 -IJuceLibraryCode
 -IDepends/JUCE/modules
+-IDepends/external/zlib
+-IDepends/gzip-hpp/include
 -DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
 -Wunused-variable

@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <gzip/decompress.hpp>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -233,7 +234,7 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
       "vstUpdatePhrases",
       [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
         const auto removedPhrases = args[0];
-        const auto changedPhrases = args[1];
+        const auto changedPhrasesCompressed = args[1];
 
         choc::audio::WAVAudioFileFormat<false> wavFileFormat;
 
@@ -241,6 +242,13 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
           auto id = std::string(phraseId.getString());
           safe_this->audioProcessor.phrases.erase(id);
         }
+
+        std::vector<uint8_t> changedPhrasesCompressedBuffer;
+        choc::base64::decodeToContainer(changedPhrasesCompressedBuffer, changedPhrasesCompressed.getString());
+        std::string changedPhrasesJson =
+            gzip::decompress(reinterpret_cast<const char*>(changedPhrasesCompressedBuffer.data()),
+                             changedPhrasesCompressedBuffer.size());
+        choc::value::Value changedPhrases = choc::json::parseValue(changedPhrasesJson);
 
         for (const auto& phraseVal : changedPhrases) {
           auto wavB64 = phraseVal["wav"].getString();

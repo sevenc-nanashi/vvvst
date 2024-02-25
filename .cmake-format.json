@@ -1,0 +1,16 @@
+{
+  "additional_commands": {
+    "juce_add_plugin": {
+      "pargs": 1,
+      "kwargs": {
+        "IS_SYNTH": 1,
+        "FORMATS": 1,
+        "COMPANY_NAME": 1,
+        "COMPANY_WEBSITE": 1,
+        "COMPANY_COPYRIGHT": 1,
+        "BUNDLE_ID": 1,
+        "PRODUCT_NAME": 1
+      }
+    }
+  }
+}

@@ -10,3 +10,9 @@
 [submodule "Depends/uuid_v4"]
 	path = Depends/uuid_v4
 	url = https://github.com/crashoz/uuid_v4.git
+[submodule "Depends/zlib"]
+	path = Depends/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "Depends/gzip-hpp"]
+	path = Depends/gzip-hpp
+	url = https://github.com/mapbox/gzip-hpp.git
