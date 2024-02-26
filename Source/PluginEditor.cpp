@@ -3,12 +3,12 @@
 #include <BinaryData.h>
 #include <MimeTypes/MimeTypes.h>
 #include <choc/gui/choc_WebView.h>
-#include <uuid_v4/uuid_v4.h>
 
 #include <cstdlib>
 #include <fstream>
 #include <gzip/decompress.hpp>
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <vector>
 
@@ -21,6 +21,27 @@ double toFloat64(const choc::value::ValueView& value) {
   } else {
     return value.getFloat64();
   }
+}
+
+std::string generateNonce() {
+  std::random_device rnd;
+  std::mt19937 mt(rnd());
+  std::uniform_int_distribution<> rand(0, 15);
+  std::string ret;
+  for (int i = 0; i < 16; i++) {
+    int r = rand(mt);
+    if (i == 6) {
+      ret += "-";
+    } else if (i == 8) {
+      ret += "-";
+    } else if (i == 10) {
+      ret += "-";
+    } else if (i == 12) {
+      ret += "-";
+    }
+    ret += "0123456789abcdef"[r];
+  }
+  return ret;
 }
 
 #ifdef JUCE_WINDOWS
@@ -196,21 +217,20 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
         }
         // juce::FileChooser chooser(title, juce::File(), extension);
         auto chooser = std::make_unique<juce::FileChooser>(title, juce::File(), extension);
-        UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-        UUIDv4::UUID uuidObj = uuidGenerator.getUUID();
-        std::string uuid = uuidObj.str();
-        chooser->launchAsync(juce::FileBrowserComponent::openMode, [safe_this, uuid](const juce::FileChooser& chooser) {
+        auto nonce = generateNonce();
+        chooser->launchAsync(juce::FileBrowserComponent::openMode, [safe_this,
+                                                                    nonce](const juce::FileChooser& chooser) {
           auto result = chooser.getResult();
           if (result == juce::File()) {
-            safe_this->chocWebView->evaluateJavascript("window.vstOnFileChosen('" + uuid + "', undefined)");
+            safe_this->chocWebView->evaluateJavascript("window.vstOnFileChosen('" + nonce + "', undefined)");
           } else {
             auto quotedString = choc::json::toString(choc::value::createString(result.getFullPathName().toStdString()));
-            safe_this->chocWebView->evaluateJavascript("window.vstOnFileChosen('" + uuid + "', " + quotedString + ")");
+            safe_this->chocWebView->evaluateJavascript("window.vstOnFileChosen('" + nonce + "', " + quotedString + ")");
           }
-          safe_this->fileChoosers.erase(uuid);
+          safe_this->fileChoosers.erase(nonce);
         });
-        safe_this->fileChoosers.insert_or_assign(uuid, std::move(chooser));
-        return choc::value::createString(uuid);
+        safe_this->fileChoosers.insert_or_assign(nonce, std::move(chooser));
+        return choc::value::createString(nonce);
       });
   chocWebView->bind(
       "vstReadFile",
