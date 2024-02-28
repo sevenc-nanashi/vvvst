@@ -181,6 +181,16 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
         }
         return choc::value::createString(res);
       });
+  chocWebView->bind(
+      "vstGetProjectName",
+      [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
+        return choc::value::createString(ProjectInfo::projectName);
+      });
+  chocWebView->bind(
+      "vstGetVersion",
+      [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
+        return choc::value::createString(ProjectInfo::versionString);
+      });
 
   chocWebView->bind(
       "vstClearPhrases",
