@@ -189,7 +189,7 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
   chocWebView->bind(
       "vstGetVersion",
       [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
-        return choc::value::createString(ProjectInfo::versionString);
+        return choc::value::createString(VVVST_VERSION);
       });
 
   chocWebView->bind(

@@ -6,4 +6,5 @@
 -IDepends/zlib
 -IDepends/gzip-hpp/include
 -DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
+-DVVVST_VERSION="999.999.999"
 -Wunused-variable

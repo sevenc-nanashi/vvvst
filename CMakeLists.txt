@@ -21,6 +21,7 @@ endif()
 
 set(OUTPUT_NAME "VVVST")
 file(READ version.txt VERSION)
+string(STRIP ${VERSION} VERSION)
 
 juce_add_plugin(
   Vvvst
@@ -33,8 +34,7 @@ juce_add_plugin(
     # COMPANY_NAME "Voicevox" COMPANY_WEBSITE "https://voicevox.hiroshiba.jp/"
     # COMPANY_COPYRIGHT "(c) 2024 Hiroshiba Kazuyuki"
   BUNDLE_ID ${BUNDLE_ID}
-  PLUGIN_NAME ${PLUGIN_NAME}
-)
+  PLUGIN_NAME ${PLUGIN_NAME})
 
 file(GLOB_RECURSE SOURCES "Source/*.cpp" "Source/*.h")
 file(GLOB_RECURSE SOURCES_MIMETYPES "Depends/MimeTypes/*.cpp"
@@ -45,8 +45,9 @@ target_sources(Vvvst PRIVATE ${SOURCES} ${SOURCES_MIMETYPES})
 
 target_include_directories(Vvvst PRIVATE Depends/ Depends/gzip-hpp/include)
 
-target_compile_definitions(Vvvst PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0
-                                        JUCE_VST3_CAN_REPLACE_VST2=0)
+target_compile_definitions(
+  Vvvst PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0
+               VVVST_VERSION="${VERSION}")
 target_link_libraries(Vvvst PRIVATE zlibstatic)
 
 file(GLOB_RECURSE RESOURCES "Resources/*")
