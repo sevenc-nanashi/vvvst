@@ -3,7 +3,20 @@ cmake_minimum_required(VERSION 3.22)
 project(VVVST VERSION 0.0.1)
 
 add_subdirectory(Depends/JUCE)
-add_subdirectory(Depends/zlib)
+
+# zlibをビルドするとzconf.hが削除されるので、zlib-tmpにコピーする。 これにより、clangdが良い感じに動くようになったり変な変更が
+# ステータスに出なくなる。（わがまま）
+# ちなみにfile(COPY)は全て終わった後に実行される＝add_subdirectoryが実行される前に実行されるので、 file(COPY)
+# ではなくexecute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ...)を使う。
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Depends/zlib-tmp)
+  message(STATUS "Copy zlib to zlib-tmp")
+  execute_process(
+    COMMAND
+      ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_SOURCE_DIR}/Depends/zlib
+      ${CMAKE_CURRENT_SOURCE_DIR}/Depends/zlib-tmp)
+endif()
+add_subdirectory(Depends/zlib-tmp)
 
 if(MSVC)
   add_compile_options(/utf-8)

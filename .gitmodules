@@ -12,5 +12,4 @@
 	url = https://github.com/mapbox/gzip-hpp.git
 [submodule "Depends/zlib"]
 	path = Depends/zlib
-  # 本家だとCMakeビルドした後にzconf.hが消し飛ぶので、修正されたフォークを使う
-	url = https://github.com/savushkin-r-d/zlib
+	url = https://github.com/madler/zlib.git

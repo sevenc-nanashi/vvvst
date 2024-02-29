@@ -23,3 +23,5 @@ build
 JuceLibraryCode
 
 .vs
+
+Depends/zlib-tmp
