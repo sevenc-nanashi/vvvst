@@ -5,7 +5,7 @@ project(VVVST VERSION 0.0.1)
 add_subdirectory(Depends/JUCE)
 
 # zlibをビルドするとzconf.hが削除されるので、zlib-tmpにコピーする。 これにより、clangdが良い感じに動くようになったり変な変更が
-# ステータスに出なくなる。（わがまま）
+# ステータスに出なくなる。（大体自分=名無し｡のわがまま、clangdとStarshipを使っているので）
 # ちなみにfile(COPY)は全て終わった後に実行される＝add_subdirectoryが実行される前に実行されるので、 file(COPY)
 # ではなくexecute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ...)を使う。
 if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Depends/zlib-tmp)
