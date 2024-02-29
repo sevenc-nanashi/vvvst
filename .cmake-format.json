@@ -9,7 +9,8 @@
         "COMPANY_WEBSITE": 1,
         "COMPANY_COPYRIGHT": 1,
         "BUNDLE_ID": 1,
-        "PRODUCT_NAME": 1
+        "PRODUCT_NAME": 1,
+        "PLUGIN_NAME": 1
       }
     }
   }

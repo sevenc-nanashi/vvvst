@@ -10,14 +10,17 @@ if(MSVC)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-  set(PRODUCT_NAME "VVVST")
+  set(PLUGIN_NAME "VVVST")
   set(BUNDLE_ID "com.sevenc-nanashi.vvvst")
   # set(BUNDLE_ID "com.hiroshiba.vvvst")
 else()
-  set(PRODUCT_NAME "VVVST (Debug)")
+  set(PLUGIN_NAME "VVVST (Debug)")
   set(BUNDLE_ID "com.sevenc-nanashi.vvvst-debug")
   # set(BUNDLE_ID "com.hiroshiba.vvvst-debug")
 endif()
+
+set(OUTPUT_NAME "VVVST")
+file(READ version.txt VERSION)
 
 juce_add_plugin(
   Vvvst
@@ -30,7 +33,8 @@ juce_add_plugin(
     # COMPANY_NAME "Voicevox" COMPANY_WEBSITE "https://voicevox.hiroshiba.jp/"
     # COMPANY_COPYRIGHT "(c) 2024 Hiroshiba Kazuyuki"
   BUNDLE_ID ${BUNDLE_ID}
-  PRODUCT_NAME ${PRODUCT_NAME})
+  PLUGIN_NAME ${PLUGIN_NAME}
+)
 
 file(GLOB_RECURSE SOURCES "Source/*.cpp" "Source/*.h")
 file(GLOB_RECURSE SOURCES_MIMETYPES "Depends/MimeTypes/*.cpp"
