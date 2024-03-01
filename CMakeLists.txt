@@ -25,10 +25,12 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
   set(PLUGIN_NAME "VVVST")
   set(BUNDLE_ID "com.sevenc-nanashi.vvvst")
+  set(PLUGIN_CODE "V3st")
   # set(BUNDLE_ID "com.hiroshiba.vvvst")
 else()
   set(PLUGIN_NAME "VVVST (Debug)")
   set(BUNDLE_ID "com.sevenc-nanashi.vvvst-debug")
+  set(PLUGIN_CODE "V3sd")
   # set(BUNDLE_ID "com.hiroshiba.vvvst-debug")
 endif()
 
@@ -46,6 +48,8 @@ juce_add_plugin(
     "(c) 2024 Nanashi."
     # COMPANY_NAME "Voicevox" COMPANY_WEBSITE "https://voicevox.hiroshiba.jp/"
     # COMPANY_COPYRIGHT "(c) 2024 Hiroshiba Kazuyuki"
+  PLUGIN_MANUFACTURER_CODE Sc7c
+  PLUGIN_CODE ${PLUGIN_CODE}
   BUNDLE_ID ${BUNDLE_ID}
   PLUGIN_NAME ${PLUGIN_NAME})
 
