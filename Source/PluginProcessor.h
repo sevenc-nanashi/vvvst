@@ -45,7 +45,7 @@ class VVVSTAudioProcessor : public juce::AudioProcessor, public juce::ActionBroa
   juce::CriticalSection phrasesLock;
 
  private:
-  juce::ValueTree memory;
+  std::string projectJson;
   std::atomic<bool> lastIsPlaying;
   std::atomic<bool> willSetIsPlaying;
   std::atomic<bool> willSetIsPlayingValue;

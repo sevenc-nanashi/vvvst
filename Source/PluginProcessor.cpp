@@ -3,9 +3,7 @@
 #include "PluginEditor.h"
 
 VVVSTAudioProcessor::VVVSTAudioProcessor()
-    : AudioProcessor(BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true)) {
-  memory = juce::ValueTree("VVVST");
-}
+    : AudioProcessor(BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true)) {}
 
 VVVSTAudioProcessor::~VVVSTAudioProcessor() {}
 
@@ -128,23 +126,25 @@ juce::AudioProcessorEditor* VVVSTAudioProcessor::createEditor() {
 }
 
 void VVVSTAudioProcessor::getStateInformation(juce::MemoryBlock& destData) {
-  std::unique_ptr<juce::XmlElement> xml(memory.createXml());
-  if (xml.get() != nullptr) {
-    copyXmlToBinary(*xml, destData);
-  }
+  auto state = choc::json::create("project", this->projectJson);
+
+  std::string jsonString = choc::json::toString(state);
+  destData.setSize(jsonString.size());
+  destData.copyFrom(jsonString.data(), 0, jsonString.size());
 }
 
 void VVVSTAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
-  std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
-
-  if (xmlState.get() != nullptr)
-    if (xmlState->hasTagName("project")) memory = juce::ValueTree::fromXml(*xmlState);
+  std::string jsonString(static_cast<const char*>(data), sizeInBytes);
+  try {
+    auto state = choc::json::parse(jsonString);
+    this->projectJson = state["project"].toString();
+  } catch (std::exception& e) {
+    DBG(e.what());
+  }
 }
 
-std::string VVVSTAudioProcessor::getProject() { return memory.getProperty("project").toString().toStdString(); }
+std::string VVVSTAudioProcessor::getProject() { return this->projectJson; }
 
-void VVVSTAudioProcessor::setProject(std::string project) {
-  memory.setProperty("project", juce::var(project), nullptr);
-}
+void VVVSTAudioProcessor::setProject(std::string project) { this->projectJson = project; }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new VVVSTAudioProcessor(); }
