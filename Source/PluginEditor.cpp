@@ -202,15 +202,15 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
   chocWebView->bind(
       "vstGetPhrases",
       [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
-        std::string res = "";
+        choc::value::Value res = choc::value::createObject("");
         for (auto& [id, phrase] : safe_this->audioProcessor.phrases) {
-          choc::audio::WAVAudioFileFormat<false> wavFileFormat;
           auto start = phrase.startTime;
           auto end = phrase.endTime;
-          res += id + ":" + std::to_string(start) + ":" + std::to_string(end) + "\n";
+          auto hash = phrase.hash;
+          res.addMember(id, choc::json::create("start", start, "end", end, "hash", hash));
         }
 
-        return choc::value::createString(res);
+        return res;
       });
   chocWebView->bind(
       "vstShowImportFileDialog",
@@ -298,7 +298,8 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
               auto data = reader->loadFileContent(safe_this->audioProcessor.sampleRate);
 
               auto id = std::string(phraseVal["id"].getString());
-              Phrase phrase(id, toFloat64(phraseVal["start"]), toFloat64(phraseVal["end"]), data);
+              auto hash = std::string(phraseVal["hash"].getString());
+              Phrase phrase(id, toFloat64(phraseVal["start"]), toFloat64(phraseVal["end"]), data, hash);
               safe_this->audioProcessor.phrases.insert_or_assign(id, phrase);
             }
           }
