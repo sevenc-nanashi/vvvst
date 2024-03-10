@@ -261,6 +261,34 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
         return choc::value::createString(data);
       });
   chocWebView->bind(
+      "vstExportProject",
+      [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
+        auto chooser = std::make_unique<juce::FileChooser>(juce::String::fromUTF8("プロジェクトファイルの書き出し"),
+                                                           juce::File(), "*.vvproj");
+        auto nonce = generateNonce();
+        chooser->launchAsync(
+            juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::warnAboutOverwriting,
+            [safe_this, nonce](const juce::FileChooser& chooser) {
+              auto result = chooser.getResult();
+              if (result == juce::File()) {
+                safe_this->chocWebView->evaluateJavascript("window.vstOnExportProjectFinished('" + nonce +
+                                                           "', 'cancelled')");
+                return;
+              }
+              auto project = safe_this->audioProcessor.getProject();
+              if (result.replaceWithData(project.c_str(), project.size())) {
+                safe_this->chocWebView->evaluateJavascript("window.vstOnExportProjectFinished('" + nonce + "', 'ok')");
+              } else {
+                safe_this->chocWebView->evaluateJavascript("window.vstOnExportProjectFinished('" + nonce +
+                                                           "', 'error')");
+              }
+
+              safe_this->fileChoosers.erase(nonce);
+            });
+        safe_this->fileChoosers.insert_or_assign(nonce, std::move(chooser));
+        return choc::value::createString(nonce);
+      });
+  chocWebView->bind(
       "vstUpdatePhrases",
       [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
         choc::value::Value removedPhrases(args[0]);
