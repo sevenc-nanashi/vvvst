@@ -89,6 +89,14 @@ jobs:
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
+      - name: Add icon (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          curl https://raw.githubusercontent.com/VOICEVOX/voicevox/main/public/icon.png -L | magick convert - -resize 256x256 build/Vvvst_artefacts/Release/VST3/VVVST.ico
+          echo '[.ShellClassInfo]\nIconResource=.\VVVST.ico,0' > build/Vvvst_artefacts/Release/VST3/desktop.ini
+
+      - name: Package
+        run: |
           cd build/Vvvst_artefacts/Release/VST3
           7z a -tzip ${{ steps.determine-information.outputs.zip_name }} VVVST.vst3
           cp ${{ steps.determine-information.outputs.zip_name }} ../../../../
