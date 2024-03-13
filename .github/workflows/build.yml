@@ -92,8 +92,8 @@ jobs:
       - name: Add icon (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          curl https://raw.githubusercontent.com/VOICEVOX/voicevox/main/public/icon.png -L | magick convert - -resize 256x256 build/Vvvst_artefacts/Release/VST3/VVVST.ico
-          echo '[.ShellClassInfo]\nIconResource=.\VVVST.ico,0' > build/Vvvst_artefacts/Release/VST3/desktop.ini
+          curl https://raw.githubusercontent.com/VOICEVOX/voicevox/main/public/icon.png -L | magick convert - -resize 256x256 build/Vvvst_artefacts/Release/VST3/VVVST.vst3/VVVST.ico
+          echo '[.ShellClassInfo]\nIconResource=.\VVVST.ico,0' > build/Vvvst_artefacts/Release/VST3/VVVST.vst3/desktop.ini
 
       - name: Package
         run: |
