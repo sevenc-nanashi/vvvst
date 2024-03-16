@@ -6,10 +6,8 @@
 
 #include <cstdlib>
 #include <fstream>
-#include <gzip/decompress.hpp>
 #include <iostream>
 #include <random>
-#include <sstream>
 #include <vector>
 
 #include "PluginProcessor.h"
@@ -292,9 +290,9 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
       "vstUpdatePhrases",
       [safe_this = juce::Component::SafePointer(this)](const choc::value::ValueView& args) -> choc::value::Value {
         choc::value::Value removedPhrases(args[0]);
-        choc::value::Value changedPhrasesCompressed(args[1]);
+        choc::value::Value changedPhrases(args[1]);
 
-        std::thread([safe_this, removedPhrases, changedPhrasesCompressed]() {
+        std::thread([safe_this, removedPhrases, changedPhrases]() {
           juce::ScopedLock lock(safe_this->audioProcessor.phrasesLock);
           choc::audio::WAVAudioFileFormat<false> wavFileFormat;
 
@@ -303,33 +301,25 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
             safe_this->audioProcessor.phrases.erase(id);
           }
 
-          if (!changedPhrasesCompressed.getString().empty()) {
-            std::vector<uint8_t> changedPhrasesCompressedBuffer;
-            choc::base64::decodeToContainer(changedPhrasesCompressedBuffer, changedPhrasesCompressed.getString());
-            std::string changedPhrasesJson =
-                gzip::decompress(reinterpret_cast<const char*>(changedPhrasesCompressedBuffer.data()),
-                                 changedPhrasesCompressedBuffer.size());
-            choc::value::Value changedPhrases = choc::json::parseValue(changedPhrasesJson);
-            for (const auto& phraseVal : changedPhrases) {
-              auto wavB64 = phraseVal["wav"].getString();
-              std::vector<uint8_t> wavBuffer;
-              choc::base64::decodeToContainer(wavBuffer, wavB64);
-              auto wavStream = new std::istringstream(std::string(wavBuffer.begin(), wavBuffer.end()));
-              auto wavStreamPtr = std::shared_ptr<std::istream>(wavStream);
-              auto reader = wavFileFormat.createReader(wavStreamPtr);
+          for (const auto& phraseVal : changedPhrases) {
+            auto wavB64 = phraseVal["wav"].getString();
+            std::vector<uint8_t> wavBuffer;
+            choc::base64::decodeToContainer(wavBuffer, wavB64);
+            auto wavStream = new std::istringstream(std::string(wavBuffer.begin(), wavBuffer.end()));
+            auto wavStreamPtr = std::shared_ptr<std::istream>(wavStream);
+            auto reader = wavFileFormat.createReader(wavStreamPtr);
 
-              if (reader == nullptr) {
-                DBG("Failed to create reader");
-                continue;
-              }
-
-              auto data = reader->loadFileContent(safe_this->audioProcessor.sampleRate);
-
-              auto id = std::string(phraseVal["id"].getString());
-              auto hash = std::string(phraseVal["hash"].getString());
-              Phrase phrase(id, toFloat64(phraseVal["start"]), toFloat64(phraseVal["end"]), data, hash);
-              safe_this->audioProcessor.phrases.insert_or_assign(id, phrase);
+            if (reader == nullptr) {
+              DBG("Failed to create reader");
+              continue;
             }
+
+            auto data = reader->loadFileContent(safe_this->audioProcessor.sampleRate);
+
+            auto id = std::string(phraseVal["id"].getString());
+            auto hash = std::string(phraseVal["hash"].getString());
+            Phrase phrase(id, toFloat64(phraseVal["start"]), toFloat64(phraseVal["end"]), data, hash);
+            safe_this->audioProcessor.phrases.insert_or_assign(id, phrase);
           }
         }).detach();
 

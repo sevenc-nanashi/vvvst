@@ -7,9 +7,3 @@
 [submodule "Depends/MimeTypes"]
 	path = Depends/MimeTypes
 	url = https://github.com/lasselukkari/MimeTypes.git
-[submodule "Depends/gzip-hpp"]
-	path = Depends/gzip-hpp
-	url = https://github.com/mapbox/gzip-hpp.git
-[submodule "Depends/zlib"]
-	path = Depends/zlib
-	url = https://github.com/madler/zlib.git
