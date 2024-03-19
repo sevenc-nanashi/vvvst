@@ -57,7 +57,7 @@ jobs:
       - name: Generate public/licenses.json
         run: |
           npm run license:generate -- -o editor_licenses.json
-          curl https://raw.githubusercontent.com/sevenc-nanashi/VVVST/${{ github.sha }}/licenses.json -LFo ./vvvst_licenses.json
+          curl https://raw.githubusercontent.com/sevenc-nanashi/VVVST/${{ github.sha }}/licenses.json -Lfo ./vvvst_licenses.json
           npm run license:merge -- -o public/licenses.json -i editor_licenses.json -i vvvst_licenses.json
 
       - name: Build
