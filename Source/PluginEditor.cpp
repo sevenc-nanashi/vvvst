@@ -43,7 +43,6 @@ std::string generateNonce() {
 }
 
 #ifdef JUCE_WINDOWS
-// std::getenvはWindowsだとDeprecatedなので、代わりに_dupenv_sを使う
 std::string safeGetenv(const char* name) {
   char* value;
   size_t len;
@@ -70,6 +69,13 @@ std::string utf8ToString(const std::vector<uint8_t>& utf8) {
   return std::string(result.begin(), result.end());
 }
 #else
+std::string safeGetenv(const char* name) {
+  auto value = std::getenv(name);
+  if (value == nullptr) {
+    return "";
+  }
+  return std::string(value);
+}
 // Windows以外では多分全部utf-8なのでそのままstd::stringに変換する
 std::string utf8ToString(const std::vector<uint8_t>& utf8) { return std::string(utf8.begin(), utf8.end()); }
 #endif
@@ -161,8 +167,8 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
         auto path = appData + "\\voicevox\\config.json";
 #elif JUCE_MAC
         // Macの場合は$HOMEディレクトリのLibrary/Application Support/voicevox/config.jsonを読み込む
-        auto home = std::getenv("HOME");
-        auto path = std::string(home) + "/Library/Application Support/voicevox/config.json";
+        auto home = safeGetenv("HOME");
+        auto path = home + "/Library/Application Support/voicevox/config.json";
 #else
 #error "Not implemented"
 #endif

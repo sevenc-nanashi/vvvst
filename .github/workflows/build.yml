@@ -23,6 +23,33 @@ jobs:
           repository: "sevenc-nanashi/voicevox"
           ref: "add/vst"
 
+      - name: Checkout Product Version Resource
+        uses: actions/checkout@v4
+        with:
+          repository: VOICEVOX/voicevox_resource
+          ref: "0.17.1"
+          path: resource
+
+      - name: Create and replace software resources
+        run: |
+          rm build/README.txt
+          rm public/policy.md
+          {
+            cat resource/editor/README.md
+            echo
+            cat resource/editor/ACKNOWLEDGMENTS.md
+          } \
+          > build/README.txt
+          cp build/README.txt public/policy.md
+
+          cp resource/editor/PRIVACYPOLICY.md public/privacyPolicy.md
+
+      - name: Generate public/licenses.json
+        run: |
+          npm run license:generate -- -o editor_licenses.json
+          curl https://raw.githubusercontent.com/sevenc-nanashi/VVVST/${{ github.sha }}/licenses.json -o ./vvvst_licenses.json
+          npm run license:merge -- -o public/licenses.json editor_licenses.json vvvst_licenses.json
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
