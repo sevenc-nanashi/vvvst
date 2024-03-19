@@ -2,11 +2,16 @@ require "json"
 require "open3"
 require "http"
 
-def generate(name, license:, url:)
+def generate(name, version: nil, license:, url:)
   path = name.split("/").last
   {
     name: name,
-    version: Open3.capture2("git", "rev-parse", "HEAD", chdir: "Depends/#{path}").first.strip,
+    version:
+      version ||
+        Open3
+          .capture2("git", "rev-parse", "HEAD", chdir: "Depends/#{path}")
+          .first
+          .strip,
     license: license,
     text: HTTP.get(url).to_s
   }
@@ -18,6 +23,13 @@ licenses = [
     license: "GPL-3.0",
     url:
       "https://raw.githubusercontent.com/juce-framework/JUCE/master/LICENSE.md"
+  ),
+  generate(
+    "COx2/audio-plugin-web-ui",
+    version: "1a42aa9d26e2d433a546555feb271601a87a9cf9",
+    license: "MIT",
+    url:
+      "https://raw.githubusercontent.com/COx2/audio-plugin-web-ui/main/LICENSE"
   ),
   generate(
     "Tracktion/choc",
