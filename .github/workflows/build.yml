@@ -44,21 +44,24 @@ jobs:
 
           cp resource/editor/PRIVACYPOLICY.md public/privacyPolicy.md
 
-      - name: Generate public/licenses.json
-        run: |
-          npm run license:generate -- -o editor_licenses.json
-          curl https://raw.githubusercontent.com/sevenc-nanashi/VVVST/${{ github.sha }}/licenses.json -o ./vvvst_licenses.json
-          npm run license:merge -- -o public/licenses.json editor_licenses.json vvvst_licenses.json
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: "npm"
 
-      - name: Build
+      - name: Install dependencies
         run: |
           npm install
+
+      - name: Generate public/licenses.json
+        run: |
+          npm run license:generate -- -o editor_licenses.json
+          curl https://raw.githubusercontent.com/sevenc-nanashi/VVVST/${{ github.sha }}/licenses.json -o ./vvvst_licenses.json
+          npm run license:merge -- -o public/licenses.json editor_licenses.json vvvst_licenses.json
+
+      - name: Build
+        run: |
           npm run vst:build
 
       - name: Upload
