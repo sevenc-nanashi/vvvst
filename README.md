@@ -1,6 +1,6 @@
 # VVVST
 
-エディタ側：https://github.com/sevenc-nanashi/voicevox/tree/add/vst
+エディタ側：https://github.com/sevenc-nanashi/voicevox/tree/add/vst  
 Issue：https://github.com/VOICEVOX/voicevox_project/issues/45
 
 ## 開発
