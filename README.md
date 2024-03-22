@@ -29,3 +29,29 @@ Copyright (c) 2023 Tatsuya Shiozawa
 Released under the MIT License
 https://github.com/COx2/audio-plugin-web-ui/blob/main/LICENSE
 ```
+
+## 仕組み
+
+```mermaid
+sequenceDiagram
+    participant daw as DAW（VST3ホスト）
+    participant cpp as VVVST
+    participant vue as Voicevox Editor
+
+    daw->>+cpp: 音声取得（processBlock）
+    Note over cpp: 保存されてるフレーズを漁る
+    cpp->>-daw: 波形送信
+    daw->>cpp: 再生情報
+    opt 再生情報が変更されたら
+      cpp->>vue: 情報送信
+      Note over vue: UIロックとか再生位置移動とか
+    end
+
+    opt エディタのフレーズが更新されたら
+        vue->>cpp: フレーズの情報取得
+        cpp->>vue: 返却
+        Note over vue, cpp: phraseId、startTime、hash
+        vue->>cpp: 差分を計算して送信
+        Note over cpp: wavパース&再サンプル->保存 @ 別スレッド
+    end
+```
