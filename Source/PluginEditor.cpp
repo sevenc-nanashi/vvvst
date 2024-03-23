@@ -169,6 +169,15 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
         // Macの場合は$HOMEディレクトリのLibrary/Application Support/voicevox/config.jsonを読み込む
         auto home = safeGetenv("HOME");
         auto path = home + "/Library/Application Support/voicevox/config.json";
+#elif JUCE_LINUX
+        // Linuxの場合は$XDG_CONFIG_HOME/voicevox/config.json、または$HOME/.config/voicevox/config.jsonを読み込む
+        // TODO：テストする
+
+        auto home = safeGetenv("XDG_CONFIG_HOME");
+        if (home.empty()) {
+          home = safeGetenv("HOME") + "/.config";
+        }
+        auto path = home + "/voicevox/config.json";
 #else
 #error "Not implemented"
 #endif
