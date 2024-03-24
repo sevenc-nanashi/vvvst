@@ -77,12 +77,14 @@ jobs:
     needs: build-editor
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
         include:
           - os: windows-latest
             name: "windows"
           - os: macos-latest
             name: "macos"
+          - os: ubuntu-latest
+            name: "linux"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout VVVST

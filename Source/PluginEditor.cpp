@@ -173,11 +173,11 @@ VVVSTAudioProcessorEditor::VVVSTAudioProcessorEditor(VVVSTAudioProcessor& p)
         // Linuxの場合は$XDG_CONFIG_HOME/voicevox/config.json、または$HOME/.config/voicevox/config.jsonを読み込む
         // TODO：テストする
 
-        auto home = safeGetenv("XDG_CONFIG_HOME");
-        if (home.empty()) {
-          home = safeGetenv("HOME") + "/.config";
+        auto configRoot = safeGetenv("XDG_CONFIG_HOME");
+        if (configRoot.empty()) {
+          configRoot = safeGetenv("HOME") + "/.config";
         }
-        auto path = home + "/voicevox/config.json";
+        auto path = configRoot + "/voicevox/config.json";
 #else
 #error "Not implemented"
 #endif
