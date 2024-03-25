@@ -49,6 +49,19 @@ target_sources(Vvvst PRIVATE ${SOURCES} ${SOURCES_MIMETYPES})
 
 target_include_directories(Vvvst PRIVATE Depends/ Depends/gzip-hpp/include)
 
+if(UNIX AND NOT APPLE)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GLIB REQUIRED glib-2.0)
+  pkg_check_modules(GTK REQUIRED gtk+-3.0)
+  pkg_check_modules(SOUP REQUIRED libsoup-3.0)
+  pkg_check_modules(JSCOREGTK REQUIRED javascriptcoregtk-4.0)
+  target_link_libraries(Vvvst PRIVATE ${GLIB_LIBRARIES} ${JSCOREGTK_LIBRARIES}
+                                      ${SOUP_LIBRARIES} ${GTK_LIBRARIES})
+  target_include_directories(
+    Vvvst PRIVATE ${GLIB_INCLUDE_DIRS} ${GTK_INCLUDE_DIRS} ${SOUP_INCLUDE_DIRS}
+                  ${JSCOREGTK_INCLUDE_DIRS})
+endif()
+
 target_compile_definitions(
   Vvvst PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0
                VVVST_VERSION="${VERSION}")
