@@ -126,6 +126,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y webkit2gtk-4.0 gtk+-x11-3.0
 
+      - name: Debug
+        uses: sevenc-nanashi/dotfiles@main
+        if: matrix.os == 'ubuntu-latest' && always()
+
       - name: Build
         run: |
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
