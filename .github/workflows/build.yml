@@ -124,7 +124,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libjavascriptcoregtk-4.0-18
+          sudo apt-get install -y webkit2gtk-4.0 gtk+-x11-3.0
 
       - name: Build
         run: |
