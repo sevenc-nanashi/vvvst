@@ -55,11 +55,13 @@ if(UNIX AND NOT APPLE)
   pkg_check_modules(GTK REQUIRED gtk+-3.0)
   pkg_check_modules(SOUP REQUIRED libsoup-3.0)
   pkg_check_modules(JSCOREGTK REQUIRED javascriptcoregtk-4.0)
-  target_link_libraries(Vvvst PRIVATE ${GLIB_LIBRARIES} ${JSCOREGTK_LIBRARIES}
-                                      ${SOUP_LIBRARIES} ${GTK_LIBRARIES})
+  pkg_check_modules(WEBKITGTK REQUIRED webkit2gtk-4.0)
+  target_link_libraries(
+    Vvvst PRIVATE ${GLIB_LIBRARIES} ${JSCOREGTK_LIBRARIES} ${SOUP_LIBRARIES}
+                  ${GTK_LIBRARIES} ${WEBKITGTK_LIBRARIES})
   target_include_directories(
     Vvvst PRIVATE ${GLIB_INCLUDE_DIRS} ${GTK_INCLUDE_DIRS} ${SOUP_INCLUDE_DIRS}
-                  ${JSCOREGTK_INCLUDE_DIRS})
+                  ${JSCOREGTK_INCLUDE_DIRS} ${WEBKITGTK_INCLUDE_DIRS})
 endif()
 
 target_compile_definitions(
