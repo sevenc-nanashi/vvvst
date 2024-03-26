@@ -1,7 +1,7 @@
 -xc++
 -std=c++17
 -IDepends
--IJuceLibraryCode
+-Ibuild/Vvvst_artefacts/JuceLibraryCode
 -IDepends/JUCE/modules
 -IDepends/zlib
 -IDepends/gzip-hpp/include
