@@ -50,8 +50,7 @@ jobs:
 
           cp resource/editor/PRIVACYPOLICY.md public/privacyPolicy.md
 
-          curl vvvst/howtouse.md -Lfo ./vvvst_howtouse.md
-          cat ./vvvst_howtouse.md ./public/howtouse.md > ./public/howtouse.md.tmp
+          cat ./vvvst/howtouse.md ./public/howtouse.md > ./public/howtouse.md.tmp
           mv ./public/howtouse.md.tmp ./public/howtouse.md
 
       - name: Setup Node.js
@@ -67,8 +66,7 @@ jobs:
       - name: Generate public/licenses.json
         run: |
           npm run license:generate -- -o editor_licenses.json
-          curl vvvst/licenses.json -Lfo ./vvvst_licenses.json
-          npm run license:merge -- -o public/licenses.json -i editor_licenses.json -i vvvst_licenses.json
+          npm run license:merge -- -o public/licenses.json -i editor_licenses.json -i vvvst/licenses.json
 
       - name: Build
         run: |
