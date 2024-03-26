@@ -42,6 +42,12 @@ licenses = [
     url:
       "https://raw.githubusercontent.com/lasselukkari/MimeTypes/master/LICENSE"
   ),
+  generate(
+    "VST 3 SDK",
+    license: "GPL-3.0",
+    version: "-",
+    url: "https://www.gnu.org/licenses/gpl-3.0.txt"
+  ),
   { name: "WebView2Loader.dll", version: "-", license: "-", text: <<~LICENSE }
     Copyright (C) Microsoft Corporation. All rights reserved.
 
