@@ -23,6 +23,11 @@ jobs:
           repository: "sevenc-nanashi/voicevox"
           ref: "add/vst"
 
+      - name: Checkout VVVST
+        uses: actions/checkout@v4
+        with:
+          path: vvvst
+
       - name: Checkout Product Version Resource
         uses: actions/checkout@v4
         with:
@@ -40,12 +45,12 @@ jobs:
             cat resource/editor/ACKNOWLEDGMENTS.md
           } \
           > build/README.txt
-          cat build/README.txt vstinfo.md > ./public/policy.md
+          cat build/README.txt vvvst/vstinfo.md > ./public/policy.md
           curl https://steinbergmedia.github.io/vst3_dev_portal/resources/licensing_6.png -o ./public/res/vst_logo.png
 
           cp resource/editor/PRIVACYPOLICY.md public/privacyPolicy.md
 
-          curl https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/howtouse.md -Lfo ./vvvst_howtouse.md
+          curl vvvst/howtouse.md -Lfo ./vvvst_howtouse.md
           cat ./vvvst_howtouse.md ./public/howtouse.md > ./public/howtouse.md.tmp
           mv ./public/howtouse.md.tmp ./public/howtouse.md
 
@@ -62,7 +67,7 @@ jobs:
       - name: Generate public/licenses.json
         run: |
           npm run license:generate -- -o editor_licenses.json
-          curl https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/licenses.json -Lfo ./vvvst_licenses.json
+          curl vvvst/licenses.json -Lfo ./vvvst_licenses.json
           npm run license:merge -- -o public/licenses.json -i editor_licenses.json -i vvvst_licenses.json
 
       - name: Build
