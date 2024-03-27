@@ -28,15 +28,6 @@ std::string generateNonce() {
   std::string ret;
   for (int i = 0; i < 16; i++) {
     int r = rand(mt);
-    if (i == 6) {
-      ret += "-";
-    } else if (i == 8) {
-      ret += "-";
-    } else if (i == 10) {
-      ret += "-";
-    } else if (i == 12) {
-      ret += "-";
-    }
     ret += "0123456789abcdef"[r];
   }
   return ret;

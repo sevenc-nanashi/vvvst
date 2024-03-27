@@ -2,6 +2,7 @@
 -std=c++17
 -IDepends
 -Ibuild/Vvvst_artefacts/JuceLibraryCode
+-Ibuild/juce_binarydata_BinaryData/JuceLibraryCode
 -IDepends/JUCE/modules
 -DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
 -DVVVST_VERSION="999.999.999"
