@@ -126,7 +126,7 @@ juce::AudioProcessorEditor* VVVSTAudioProcessor::createEditor() {
 }
 
 void VVVSTAudioProcessor::getStateInformation(juce::MemoryBlock& destData) {
-  auto state = choc::json::create("project", this->projectJson);
+  auto state = choc::json::create("project", this->projectJson, "version", 0);
 
   std::string jsonString = choc::json::toString(state);
   destData.setSize(jsonString.size());
