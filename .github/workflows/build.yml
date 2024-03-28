@@ -45,7 +45,9 @@ jobs:
             cat resource/editor/ACKNOWLEDGMENTS.md
           } \
           > build/README.txt
-          cat build/README.txt vvvst/vstinfo.md > ./public/policy.md
+          cp build/README.txt public/policy.md
+          echo "----" >> public/policy.md
+          cat vvvst/vstinfo.md >> public/policy.md
           curl https://steinbergmedia.github.io/vst3_dev_portal/resources/licensing_6.png -o ./public/res/vst_logo.png
 
           cp resource/editor/PRIVACYPOLICY.md public/privacyPolicy.md
