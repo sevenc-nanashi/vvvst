@@ -10,22 +10,24 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
   set(PLUGIN_NAME "VVVST")
+  set(PRODUCT_NAME "VVVST")
   set(BUNDLE_ID "com.sevenc-nanashi.vvvst")
   set(PLUGIN_CODE "Vvst")
   # set(BUNDLE_ID "com.hiroshiba.vvvst")
 else()
   set(PLUGIN_NAME "VVVST (Debug)")
+  set(PRODUCT_NAME "VVVST_Debug")
   set(BUNDLE_ID "com.sevenc-nanashi.vvvst-debug")
   set(PLUGIN_CODE "Vvsd")
   # set(BUNDLE_ID "com.hiroshiba.vvvst-debug")
 endif()
 
-set(OUTPUT_NAME "VVVST")
 file(READ version.txt VERSION)
 string(STRIP ${VERSION} VERSION)
 
 juce_add_plugin(
   Vvvst
+  PRODUCT_NAME ${PRODUCT_NAME}
   IS_SYNTH TRUE
   FORMATS VST3
   COMPANY_NAME "Nanashi. <https://sevenc7c.com>"
