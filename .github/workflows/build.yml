@@ -152,6 +152,8 @@ jobs:
             core.setOutput('ref_name', version);
             core.setOutput('prerelease', version.includes("-"));
             core.setOutput('zip_name', `vvvst-${version}-${{ matrix.name }}.zip`);
+            require('fs').writeFileSync('version.txt', version);
+
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
