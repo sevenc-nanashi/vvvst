@@ -120,10 +120,10 @@ jobs:
           script: |
             let version = github.ref_name;
             if (!version) {
-              version = "999.999.999-dev";
+              version = "999.999.999";
             }
             core.setOutput('ref_name', version);
-            core.setOutput('prerelease', version.includes("-"));
+            core.setOutput('prerelease', version === "999.999.999" || version.includes("-"));
             core.setOutput('zip_name', `vvvst-${version}-${{ matrix.name }}.zip`);
             require('fs').writeFileSync('version.txt', version);
 
