@@ -34,8 +34,6 @@ VIAddVersionKey "FileVersion" "${SETUP_VERSION}"
 ;-------------------------------------------------------------------------------
 ; Modern UI Appearance
 !define MUI_ICON "Assets\VVVST.ico"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "Assets\installer_background.bmp"
-!define MUI_UNWELCOMEFINISHPAGE_BITMAP "Assets\installer_background.bmp"
 
 ;-------------------------------------------------------------------------------
 ; Installer Pages
