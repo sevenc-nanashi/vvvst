@@ -82,6 +82,7 @@ jobs:
   build-each:
     needs: build-editor
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
         include:
@@ -138,8 +139,6 @@ jobs:
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
-          mv build/Vvvst_artefacts/Release/VST3/Vvvst.vst3 build/Vvvst_artefacts/Release/VST3/VVVST.vst3
-
       - name: Package
         run: |
           cd build/Vvvst_artefacts/Release/VST3
@@ -158,7 +157,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: "3.2"
 
       - name: Build installer
         if: matrix.os == 'windows-latest'
