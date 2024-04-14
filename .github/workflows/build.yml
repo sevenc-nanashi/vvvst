@@ -134,22 +134,11 @@ jobs:
 
       - name: Build
         run: |
-<<<<<<< HEAD
           rm -rf build/Vvvst_artefacts
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
-      - name: Add icon (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          curl https://raw.githubusercontent.com/VOICEVOX/voicevox/main/public/icon.png -L | magick convert - -resize 256x256 build/Vvvst_artefacts/Release/VST3/VVVST.vst3/VVVST.ico
-          echo -e '[.ShellClassInfo]\nIconResource=.\VVVST.ico,0' > build/Vvvst_artefacts/Release/VST3/VVVST.vst3/desktop.ini
-=======
-          rm -rf ./build/Vvvst_artefacts
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release
           mv build/Vvvst_artefacts/Release/VST3/Vvvst.vst3 build/Vvvst_artefacts/Release/VST3/VVVST.vst3
->>>>>>> a4bf51e (Update: Workflowを更新)
 
       - name: Package
         run: |
