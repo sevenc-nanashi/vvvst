@@ -10,14 +10,6 @@ end
 task "installer" do
   base = File.read("./Assets/installer_base.nsi")
   base.gsub!("{version}", File.read("version.txt").strip)
-  File.write(
-    "./build/voicevox_license.md",
-    HTTP.get(
-      "https://raw.githubusercontent.com/VOICEVOX/voicevox_resource/main/editor/README.md"
-    ).to_s,
-    mode: "wb",
-    encoding: OS.windows? ? "shift_jis" : "utf-8"
-  )
   File.write("installer.nsi", base)
 
   sh 'makensis /INPUTCHARSET UTF8 .\installer.nsi'

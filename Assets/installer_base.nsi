@@ -38,7 +38,6 @@ VIAddVersionKey "FileVersion" "${SETUP_VERSION}"
 ;-------------------------------------------------------------------------------
 ; Installer Pages
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "./build/voicevox_license.md"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
