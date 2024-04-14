@@ -47,12 +47,12 @@ jobs:
           > build/README.txt
           cp build/README.txt public/policy.md
           echo "----" >> public/policy.md
-          cat vvvst/vstinfo.md >> public/policy.md
+          cat vvvst/Assets/vstinfo.md >> public/policy.md
           curl https://steinbergmedia.github.io/vst3_dev_portal/resources/licensing_6.png -o ./public/res/vst_logo.png
 
           cp resource/editor/PRIVACYPOLICY.md public/privacyPolicy.md
 
-          cat ./vvvst/howtouse.md ./public/howtouse.md > ./public/howtouse.md.tmp
+          cat ./vvvst/Assets/howtouse.md ./public/howtouse.md > ./public/howtouse.md.tmp
           mv ./public/howtouse.md.tmp ./public/howtouse.md
 
       - name: Setup Node.js
@@ -68,7 +68,7 @@ jobs:
       - name: Generate public/licenses.json
         run: |
           npm run license:generate -- -o editor_licenses.json
-          npm run license:merge -- -o public/licenses.json -i editor_licenses.json -i vvvst/licenses.json
+          npm run license:merge -- -o public/licenses.json -i editor_licenses.json -i vvvst/Assets/licenses.json
 
       - name: Build
         run: |
@@ -134,6 +134,7 @@ jobs:
 
       - name: Build
         run: |
+<<<<<<< HEAD
           rm -rf build/Vvvst_artefacts
           cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
@@ -143,6 +144,12 @@ jobs:
         run: |
           curl https://raw.githubusercontent.com/VOICEVOX/voicevox/main/public/icon.png -L | magick convert - -resize 256x256 build/Vvvst_artefacts/Release/VST3/VVVST.vst3/VVVST.ico
           echo -e '[.ShellClassInfo]\nIconResource=.\VVVST.ico,0' > build/Vvvst_artefacts/Release/VST3/VVVST.vst3/desktop.ini
+=======
+          rm -rf ./build/Vvvst_artefacts
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+          mv build/Vvvst_artefacts/Release/VST3/Vvvst.vst3 build/Vvvst_artefacts/Release/VST3/VVVST.vst3
+>>>>>>> a4bf51e (Update: Workflowを更新)
 
       - name: Package
         run: |
@@ -157,3 +164,20 @@ jobs:
           prerelease: ${{ steps.determine-information.outputs.prerelease }}
           files: ${{ steps.determine-information.outputs.zip_name }}
           tag_name: ${{ steps.determine-information.outputs.ref_name }}
+
+      - name: Setup Ruby
+        if: matrix.os == 'windows-latest'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+
+      - name: Build installer
+        if: matrix.os == 'windows-latest'
+        run: |
+          rake installer
+
+      - name: Upload installer
+        if: matrix.os == 'windows-latest'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./build/VVVST-*-setup.exe
