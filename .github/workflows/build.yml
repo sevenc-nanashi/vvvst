@@ -124,7 +124,7 @@ jobs:
             }
             core.setOutput('ref_name', version);
             core.setOutput('prerelease', version === "999.999.999" || version.includes("-"));
-            core.setOutput('zip_name', `vvvst-${version}-${{ matrix.name }}.zip`);
+            core.setOutput('zip_name', `VVVST-${version}-${{ matrix.name }}.zip`);
             require('fs').writeFileSync('version.txt', version);
 
       - name: Install dependencies (Ubuntu)
