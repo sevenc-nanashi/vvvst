@@ -162,6 +162,7 @@ jobs:
       - name: Build installer
         if: matrix.os == 'windows-latest'
         run: |
+          gem update rake
           rake installer
 
       - name: Upload installer
