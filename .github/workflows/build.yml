@@ -79,35 +79,8 @@ jobs:
         with:
           name: build-editor
           path: dist_vst/voicevox.zip
-  prebuild:
-    runs-on: ubuntu-latest
-    outputs:
-      ref_name: ${{ steps.determine-information.outputs.ref_name }}
-      prerelease: ${{ steps.determine-information.outputs.prerelease }}
-    steps:
-      - name: Checkout VVVST
-        uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
-
-      - name: Determine Information
-        id: determine-information
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            if (github.ref_name) {
-              core.setOutput('ref_name', github.ref_name);
-              core.setOutput('prerelease', github.ref_name.includes("-"));
-              core.setOutput('zip_name', `vvvst-${github.ref_name}-${{ matrix.name }}.zip`);
-            } else {
-              core.setOutput('ref_name', "dev");
-              core.setOutput('prerelease', true);
-              core.setOutput('zip_name', `vvvst-dev-${{ matrix.name }}.zip`);
-            }
   build-each:
     needs:
-      - prebuild
       - build-editor
     strategy:
       fail-fast: false
