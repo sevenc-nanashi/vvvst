@@ -1,5 +1,7 @@
 # VVVST
 
+Voicevox の VST プラグイン。
+
 エディタ側：https://github.com/sevenc-nanashi/voicevox/tree/add/vst  
 Issue：https://github.com/VOICEVOX/voicevox_project/issues/45
 
@@ -10,6 +12,8 @@ Issue：https://github.com/VOICEVOX/voicevox_project/issues/45
 
 ## ビルド
 
+### VST プラグイン本体
+
 ```bash
 # Debug
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
@@ -18,6 +22,25 @@ cmake --build build --config Debug
 # Release
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
+```
+
+### ライセンス情報（`./Assets/licenses.json`）
+
+依存：
+- Ruby（3.2 で動作確認）
+
+```bash
+rake license
+```
+
+### Windows用インストーラー
+
+依存：
+- Ruby（3.2 で動作確認）
+- [NSIS](https://nsis.sourceforge.io/Main_Page)（3.09 で動作確認）
+
+```bash
+rake installer
 ```
 
 ## ライセンス表記
