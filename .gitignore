@@ -25,3 +25,4 @@ JuceLibraryCode
 .vs
 
 Depends/zlib-tmp
+installer.nsi
